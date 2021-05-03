@@ -12,12 +12,6 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger()
 
 
-# logging.basicConfig(level=logging.DEBUG,
-#                     filename=os.path.join(os.getcwd(), 'logfile2.log'),
-#                     filemode='w', format=LOG_FORMAT)
-# logger_test_case2 = logging.getLogger()
-
-
 class Test(ABC):
 
     @abstractmethod
@@ -76,11 +70,11 @@ class TestCase1(Test):
             logger.info(f'The test {self.tc_id}, {self.name} will run')
             print(self.run())
             logger.info(f'The list of files from home directory was printed to the console')
-            logger.info(f'Test completed successfully!')
+            logger.info(f'Test id {self.tc_id}, {self.name} completed successfully!')
             self.clean_up()
         else:
             self.clean_up()
-            logger.error(f'Test execution terminated')
+            logger.error(f'Test id {self.tc_id}, {self.name} execution terminated')
 
 
 class TestCase2(Test):
@@ -115,15 +109,16 @@ class TestCase2(Test):
         if self.prep():
             logger.info(f'The test id {self.tc_id}, {self.name} will run')
             self.run()
-            logger.info(f'File test with random content created')
+            logger.info(f'File <test> with random content created')
             self.clean_up()
-            logger.info(f'Test completed successfully!')
+            logger.info(f'Test id {self.tc_id}, {self.name} completed successfully!')
         else:
-            logger.error(f'Test execution terminated {virtual_memory().total / 1024 ** 3} GB < 1 GB')
+            logger.error(
+                f'Test id {self.tc_id}, {self.name} execution terminated {virtual_memory().total / 1024 ** 3} GB < 1 GB')
 
 
 if __name__ == '__main__':
-    # test_case_1 = TestCase1(name='test1', tc_id=1)
-    # test_case_1.execute()
+    test_case_1 = TestCase1(name='test1', tc_id=1)
+    test_case_1.execute()
     test_case_2 = TestCase2(name='test2', tc_id=2)
     test_case_2.execute()
