@@ -6,6 +6,12 @@ import os
 import sys
 from psutil import virtual_memory
 
+LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
+logging.basicConfig(level=logging.DEBUG,
+                    filename=os.path.join(os.getcwd(), 'logfile.log'),
+                    filemode='w', format=LOG_FORMAT)
+logger = logging.getLogger()
+
 
 class Test(ABC):
 
@@ -48,19 +54,24 @@ class TestCase1(Test):
         self.name = name
 
     def prep(self) -> bool:
+        logger.debug(f'prep')
         seconds_since_epoch = int(time.time())
         return True if seconds_since_epoch % 2 != 0 else False
 
+
     def run(self) -> Sequence:
+        logger.debug(f'run')
         home_user_dir = os.path.expanduser("~")
         list_of_files = [file for file in os.listdir(home_user_dir) if
                          os.path.isfile(os.path.join(home_user_dir, file))]
         return list_of_files
 
     def clean_up(self):
+        logger.debug(f'clean_up')
         sys.exit()
 
     def execute(self):
+        logger.debug(f'execute')
         if self.prep():
             print(self.run())
         else:
@@ -81,15 +92,18 @@ class TestCase2(Test):
         self.name = name
 
     def prep(self) -> bool:
+        logger.debug(f'prep')
         memory = virtual_memory()
         gigabytes = memory.total // 1024 ** 2
-        return True if gigabytes > 1024 else False
+        return True if gigabytes < 1024 else False
 
     def run(self):
+        logger.debug(f'run')
         with open('test', 'wb') as test_file:
             test_file.write(os.urandom(1024 ** 2))
 
     def clean_up(self):
+        logger.debug(f'clean_up')
         path_to_test_file = os.path.join(os.getcwd(), 'test')
         if os.path.exists(path_to_test_file):
             os.remove(path_to_test_file)
@@ -97,6 +111,7 @@ class TestCase2(Test):
             raise FileNotFoundError
 
     def execute(self):
+        logger.debug(f'execute')
         if not self.prep():
             self.run()
             self.clean_up()
