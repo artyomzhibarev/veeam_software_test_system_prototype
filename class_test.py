@@ -8,9 +8,14 @@ from psutil import virtual_memory
 
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG,
-                    filename=os.path.join(os.getcwd(), 'logfile.log'),
+                    filename=os.path.join(os.getcwd(), 'logfile1.log'),
                     filemode='w', format=LOG_FORMAT)
-logger = logging.getLogger()
+logger_test_case1 = logging.getLogger()
+
+logging.basicConfig(level=logging.DEBUG,
+                    filename=os.path.join(os.getcwd(), 'logfile2.log'),
+                    filemode='w', format=LOG_FORMAT)
+logger_test_case2 = logging.getLogger()
 
 
 class Test(ABC):
@@ -54,28 +59,27 @@ class TestCase1(Test):
         self.name = name
 
     def prep(self) -> bool:
-        logger.debug(f'prep')
         seconds_since_epoch = int(time.time())
-        return True if seconds_since_epoch % 2 != 0 else False
-
+        return False if seconds_since_epoch % 2 != 0 else True
 
     def run(self) -> Sequence:
-        logger.debug(f'run')
         home_user_dir = os.path.expanduser("~")
         list_of_files = [file for file in os.listdir(home_user_dir) if
                          os.path.isfile(os.path.join(home_user_dir, file))]
         return list_of_files
 
     def clean_up(self):
-        logger.debug(f'clean_up')
         sys.exit()
 
     def execute(self):
-        logger.debug(f'execute')
         if self.prep():
+            logger_test_case1.info(f'The test {self.tc_id}, {self.name} will run')
             print(self.run())
-        else:
+            logger_test_case1.info(f'The list of files from home directory was printed to the console')
+            logger_test_case1.info(f'Test completed successfully!')
             self.clean_up()
+        logger_test_case1.error(f'Test execution terminated')
+        self.clean_up()
 
 
 class TestCase2(Test):
@@ -92,18 +96,15 @@ class TestCase2(Test):
         self.name = name
 
     def prep(self) -> bool:
-        logger.debug(f'prep')
         memory = virtual_memory()
         gigabytes = memory.total // 1024 ** 2
-        return True if gigabytes < 1024 else False
+        return False if gigabytes < 1024 else True
 
     def run(self):
-        logger.debug(f'run')
         with open('test', 'wb') as test_file:
             test_file.write(os.urandom(1024 ** 2))
 
     def clean_up(self):
-        logger.debug(f'clean_up')
         path_to_test_file = os.path.join(os.getcwd(), 'test')
         if os.path.exists(path_to_test_file):
             os.remove(path_to_test_file)
@@ -111,8 +112,7 @@ class TestCase2(Test):
             raise FileNotFoundError
 
     def execute(self):
-        logger.debug(f'execute')
-        if not self.prep():
+        if self.prep():
             self.run()
             self.clean_up()
 
