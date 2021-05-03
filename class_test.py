@@ -3,19 +3,19 @@ from abc import ABC, abstractmethod
 import logging
 import time
 import os
-import sys
 from psutil import virtual_memory
 
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG,
-                    filename=os.path.join(os.getcwd(), 'logfile1.log'),
-                    filemode='w', format=LOG_FORMAT)
-logger_test_case1 = logging.getLogger()
+                    filename=os.path.join(os.getcwd(), 'logfile.log'),
+                    filemode='a', format=LOG_FORMAT)
+logger = logging.getLogger()
 
-logging.basicConfig(level=logging.DEBUG,
-                    filename=os.path.join(os.getcwd(), 'logfile2.log'),
-                    filemode='w', format=LOG_FORMAT)
-logger_test_case2 = logging.getLogger()
+
+# logging.basicConfig(level=logging.DEBUG,
+#                     filename=os.path.join(os.getcwd(), 'logfile2.log'),
+#                     filemode='w', format=LOG_FORMAT)
+# logger_test_case2 = logging.getLogger()
 
 
 class Test(ABC):
@@ -69,17 +69,18 @@ class TestCase1(Test):
         return list_of_files
 
     def clean_up(self):
-        sys.exit()
+        ...
 
     def execute(self):
         if self.prep():
-            logger_test_case1.info(f'The test {self.tc_id}, {self.name} will run')
+            logger.info(f'The test {self.tc_id}, {self.name} will run')
             print(self.run())
-            logger_test_case1.info(f'The list of files from home directory was printed to the console')
-            logger_test_case1.info(f'Test completed successfully!')
+            logger.info(f'The list of files from home directory was printed to the console')
+            logger.info(f'Test completed successfully!')
             self.clean_up()
-        logger_test_case1.error(f'Test execution terminated')
-        self.clean_up()
+        else:
+            self.clean_up()
+            logger.error(f'Test execution terminated')
 
 
 class TestCase2(Test):
@@ -97,8 +98,7 @@ class TestCase2(Test):
 
     def prep(self) -> bool:
         memory = virtual_memory()
-        gigabytes = memory.total // 1024 ** 2
-        return False if gigabytes < 1024 else True
+        return False if memory.total // 1024 ** 2 < 1024 else True
 
     def run(self):
         with open('test', 'wb') as test_file:
@@ -113,8 +113,13 @@ class TestCase2(Test):
 
     def execute(self):
         if self.prep():
+            logger.info(f'The test id {self.tc_id}, {self.name} will run')
             self.run()
+            logger.info(f'File test with random content created')
             self.clean_up()
+            logger.info(f'Test completed successfully!')
+        else:
+            logger.error(f'Test execution terminated {virtual_memory().total / 1024 ** 3} GB < 1 GB')
 
 
 if __name__ == '__main__':
